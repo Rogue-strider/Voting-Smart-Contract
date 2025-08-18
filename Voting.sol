@@ -55,6 +55,7 @@ contract vote {
     ) external {
         require(_age>=18,"Age is under 18");
         require(candidateVerification(msg.sender),"You have already registered");
+        require(nextCandidateId<3,"Candidate registration full");
         candidateDetails[nextCandidateId]=Candidate({
             name:_name,
             party:_party,
@@ -64,12 +65,33 @@ contract vote {
             candidateAddress:msg.sender,
             votes:0
         });
+        nextCandidateId++;
     }
 
     function candidateVerification(address _person) internal view returns (bool) {
+        for(uint candidateId=1; candidateId<nextCandidateId; candidateId++){
+            if(candidateDetails[candidateId].candidateAddress==_person){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function candidateList() public view returns (Candidate[] memory){
+        Candidate[] memory listOfCandidate = new Candidate[](nextCandidateId-1);
+        for(uint i=1;i<nextCandidateId;i++){
+            listOfCandidate[i-1]=candidateDetails[i];//tranfering data from mapping to array
+        }
+        return listOfCandidate;
+    }
+
+    function voterRegister(string calldata _name, uint _age, string calldata _gender) public{
 
     }
 
+    function voterVerification(address _person) internal view returns (bool){
+
+    }
 
 }
 
