@@ -124,7 +124,7 @@ contract vote {
     function votingStatus() public view returns(string memory){
         if(startTime==0){
             return "Voting has not started";
-        }else if(block.timestamp<endTime && startTime!=0 || stopVoting!=true){
+        }else if((block.timestamp<endTime && startTime!=0) && stopVoting!=true){
             return "Voting is going on";
         }else{
             return "Voting has ended";
