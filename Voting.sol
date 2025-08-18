@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.5.0 <0.9.0;
 
-contract vote {
+contract Vote {
     struct Voter{
         string name;
         uint age;
@@ -37,6 +37,11 @@ contract vote {
 
     constructor(){
         electionComission=msg.sender;
+    }
+
+    modifier isVotingOver(){
+        require(endTime>block.timestamp && stopVoting!=true, "Voting is over");
+        _;
     }
 
     modifier onlyCommissioner(){
@@ -116,6 +121,18 @@ contract vote {
         return voterArr;
     }
 
+    function vote(uint _voterId, uint _candidateId) external isVotingOver() {
+        require(voterDetails[_voterId].voterAddress==msg.sender,"You are not a valid voter"); //if voter is valid        
+        require(_candidateId>0 && _candidateId<3,"Candidate id is not valid");
+        require(startTime!=0,"Voting has not started");
+        require(nextCandidateId==3,"Candidates have not registered");
+        require(block.timestamp<endTime,"Voting has ended"); //if voting has ended
+        require(stopVoting!=true,"Voting has been stopped due to emergency"); //if voting has been stopped
+        require(voterDetails[_voterId].voteCandidateId==0,"You have already voted"); //if voter has already voted
+        voterDetails[_voterId].voteCandidateId=_candidateId; //voter assigns candidate id to whom he voted
+        candidateDetails[_candidateId].votes++; //increasing vote count of candidate
+    }
+
     function voteTime(uint _startTime, uint duration) external onlyCommissioner(){
         startTime=_startTime;
         endTime=_startTime+duration;
@@ -131,13 +148,13 @@ contract vote {
         }
     }
 
-    function result() external view onlyCommissioner(){
+    function result() external onlyCommissioner(){
         uint maxVotes=0;
-        uint winnerId=0;
+        // uint winnerId=0;
         for(uint i=1;i<nextCandidateId;i++){
             if(candidateDetails[i].votes>maxVotes){
                 maxVotes=candidateDetails[i].votes;
-                winnerId=i;
+                winner=candidateDetails[i].candidateAddress;
             }
         }
     }
