@@ -2,7 +2,7 @@
 pragma solidity >=0.5.0 <0.9.0;
 
 contract vote {
-    struct voter{
+    struct Voter{
         string name;
         uint age;
         uint voterId;
@@ -31,7 +31,7 @@ contract vote {
     uint startTime;//start time of election
     uint endTime; //end time of election
 
-    mapping(uint=>voter) voterDetails; //Details of voters
+    mapping(uint=>Voter) voterDetails; //Details of voters
     mapping(uint=>Candidate) candidateDetails;
     bool stopVoting; //This is for an emergency to stop voting
 
@@ -85,12 +85,65 @@ contract vote {
         return listOfCandidate;
     }
 
-    function voterRegister(string calldata _name, uint _age, string calldata _gender) public{
-
+    function voterRegister(string calldata _name, uint _age, string calldata _gender) external {
+        require(_age>=18,"Age is under 18");
+        require(voterVerification(msg.sender),"You have already registered");
+        voterDetails[newVoterId]=Voter({
+            name:_name,
+            age:_age,
+            voterId:newVoterId,
+            gender:_gender,
+            voteCandidateId:0,
+            voterAddress:msg.sender
+        });
+        newVoterId++;
     }
 
     function voterVerification(address _person) internal view returns (bool){
+        for(uint voterId=1; voterId<newVoterId; voterId++){
+            if(voterDetails[voterId].voterAddress==_person){
+                return false;
+            }
+        }
+        return true;
+    }
 
+    function voterList() public view returns (Voter[] memory){
+        Voter[] memory voterArr = new Voter[](newVoterId - 1);
+        for(uint i=1;i<newVoterId;i++){
+            voterArr[i-1]=voterDetails[i];
+        }
+        return voterArr;
+    }
+
+    function voteTime(uint _startTime, uint duration) external onlyCommissioner(){
+        startTime=_startTime;
+        endTime=_startTime+duration;
+    }
+
+    function votingStatus() public view returns(string memory){
+        if(startTime==0){
+            return "Voting has not started";
+        }else if(block.timestamp<endTime && startTime!=0 || stopVoting!=true){
+            return "Voting is going on";
+        }else{
+            return "Voting has ended";
+        }
+    }
+
+    function result() external view onlyCommissioner(){
+        uint maxVotes=0;
+        uint winnerId=0;
+        for(uint i=1;i<nextCandidateId;i++){
+            if(candidateDetails[i].votes>maxVotes){
+                maxVotes=candidateDetails[i].votes;
+                winnerId=i;
+            }
+        }
+    }
+
+    function emergency() public onlyCommissioner(){
+        stopVoting=true;
     }
 
 }
