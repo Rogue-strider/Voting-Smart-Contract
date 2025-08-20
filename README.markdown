@@ -101,4 +101,4 @@ This is a Solidity-based Voting Smart Contract designed for a decentralized voti
 
 Feel free to fork this repository, create pull requests, or report issues for improvements or bug fixes.
 
-##SOON WILL UPLOAD ITS FRONTENT PART WITH THIS SOLDITY CODE INTEGRATION. Happy Coding🚀💫
+## SOON WILL UPLOAD ITS FRONTENT PART WITH THIS SOLDITY CODE INTEGRATION. Happy Coding🚀💫
